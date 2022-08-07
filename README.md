@@ -24,7 +24,7 @@ $ merge-junit *.xml -o merged-tests.xml
 
 ## Development setup
 
-Uses `rustfmt` and `clippy`.
+Uses [`rustfmt`](https://github.com/rust-lang/rustfmt) and [`clippy`](https://github.com/rust-lang/rust-clippy).
 
 ```sh
 $ git clone https://github.com/tobni/merge-junit
