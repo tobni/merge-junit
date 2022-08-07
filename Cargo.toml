@@ -1,8 +1,20 @@
 [package]
 name = "merge-junit"
 version = "0.1.0"
+description = "CLI utility to merge JUnit compliant XML documents into a single XML document."
+keywords = ["junit", "xml", "test", "report"]
+categories = ["command-line-utilities", "text-processing"]
+license = "Unlicense"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+quick-xml = "^0.23"
+anyhow = "^1.0"
+clap = { version = "^3.2", features = ["cargo"] }
+
+[dev-dependencies]
+assert_cmd = "^2.0"
+assert_fs = "^1.0"
+predicates = "^2.1"
