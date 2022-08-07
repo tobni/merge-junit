@@ -3,7 +3,7 @@ use crate::junit_merger::testsuites::Testsuites;
 use super::*;
 
 #[test]
-fn test_can_read_testsuites_start_tag() -> Result<()> {
+fn can_read_testsuites_start_tag() -> Result<()> {
     let mut read_target =
         given_read_target(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuites>");
 
@@ -14,7 +14,7 @@ fn test_can_read_testsuites_start_tag() -> Result<()> {
 }
 
 #[test]
-fn test_can_read_testsuites_start_tag_with_attributes() -> Result<()> {
+fn can_read_testsuites_start_tag_with_attributes() -> Result<()> {
     let mut read_target = given_read_target(
         b"<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuites name=\"My Module\">",
     );
@@ -31,7 +31,7 @@ fn test_can_read_testsuites_start_tag_with_attributes() -> Result<()> {
 }
 
 #[test]
-fn test_errors_when_content_is_missing_xml_decl() -> Result<()> {
+fn content_missing_xml_decl_is_an_error() -> Result<()> {
     let mut read_target = given_read_target(b"<testsuites>");
 
     let testsuites = read_target.read_until_testsuites(&mut vec![]);

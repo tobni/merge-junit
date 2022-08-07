@@ -10,7 +10,7 @@ $ git clone https://github.com/tobni/merge-junit
 $ cd merge-junit
 $ cargo build --release
 $ ./target/release/merge-junit --version
-<VERSION>
+merge-junit 0.1.0
 ```
 
 ## Usage example
