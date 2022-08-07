@@ -3,7 +3,7 @@
 
 ## Installation
 
-OS X & Linux:
+From source:
 
 ```sh
 $ git clone https://github.com/tobni/merge-junit
@@ -15,8 +15,8 @@ $ ./target/release/merge-junit --version
 
 ## Usage example
 
-Some test runners run in parallel produce many small JUnit reports. 
-Stitching them together to feed e.g. a GUI can increase readability.
+Some test runners run in parallel and produce many small JUnit reports.
+Stitching them together to feed a GUI / reporting application can increase readability.
 
 ```sh
 $ merge-junit *.xml -o merged-tests.xml
