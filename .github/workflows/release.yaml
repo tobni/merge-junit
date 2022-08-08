@@ -75,7 +75,7 @@ jobs:
 
         cp {README.md,LICENSE} "$package/"
 
-        if [ "${{ matrix.os }}" = "windows" ]; then
+        if [ "${{ matrix.os }}" = "windows-latest" ]; then
           cp "target/${{ matrix.target }}/release/merge-junit.exe" "$package/"
           7z a "$package.zip" "$package"
           echo "PACKAGE=$package.zip" >> $GITHUB_ENV
