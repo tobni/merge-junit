@@ -1,0 +1,84 @@
+on:
+  push:
+    tags:
+      - 'v*'
+
+name: Create Release
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Get changelog
+        run: |
+          echo '# Changes' > changelog.md
+          git log --oneline $(git describe --tags --abbrev=0 @^)..@ >> changelog.md
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body_path: changelog.md
+          draft: false
+          prerelease: false
+  
+  build:
+    name: Build
+    needs: release
+    strategy:
+      matrix:
+        build: [linux, mac, windows]
+        include:
+          - build: linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - build: mac
+            os: macos-latest
+            target: x86_64-apple-darwin
+          - build: windows
+            os: windows-latest
+            target: x86_64-pc-windows-gnu
+    runs-on: ${{ maxtrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: ${{ matrix.target }}
+        override: true
+
+    - name: Archive build
+      shell: bash
+      run: |
+        package=merge-junit-${{ github.ref }}-${{ matrix.os }}
+        mkdir -p .target
+
+        cp {README.md,LICENSE} ".target/"
+
+        if [ "${{ matrix.os }}" = "windows" ]; then
+          cp "target/${{ matrix.target }}/release/junit-merge.exe" ".target/"
+          7z a "$package.zip" "./target"
+          echo "PACKAGE=$package.zip" >> $GITHUB_ENV
+        else
+          cp "target/${{ matrix.target }}/release/junit-merge" ".target/"
+          tar czf "$package.tar.gz" ".target"
+          echo "PACKAGE=$package.tar.gz" >> $GITHUB_ENV
+        fi
+    
+    - name: Upload release archive
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.release.outputs.upload_url }}
+        asset_path: ${{ env.PACKAGE }}
+        asset_name: ${{ env.PACKAGE }}
+        asset_content_type: application/octet-stream
