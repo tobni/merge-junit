@@ -1,0 +1,32 @@
+name: CI
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    - '*main'
+
+jobs:
+  test:
+    name: Test
+    strategy:
+      matrix:
+        build: [linux, mac, windows, default]
+        include:
+          - build: linux
+            os: ubuntu-latest
+          - build: mac
+            os: macos-latest
+          - build: windows
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - run: actions/checkout@v3
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.os }}
+          profile: minimal
+          override: true
+      
+      - uses: Swatinem/rust-cache@v1
+      - run: cargo test
