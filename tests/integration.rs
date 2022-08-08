@@ -162,13 +162,10 @@ trait ContainsLinesTrimmedStdout {
 
 impl ContainsLinesTrimmedStdout for assert_cmd::assert::Assert {
     fn stdout_contains_lines_trimmed<'a>(self, lines: impl Iterator<Item = &'a str>) -> Self {
-        fn contains_trimmed_line(
-            assert: assert_cmd::assert::Assert,
-            line: &str,
-        ) -> assert_cmd::assert::Assert {
-            assert.stdout(predicates::str::contains(line.trim()))
-        }
-        lines.fold(self, contains_trimmed_line)
+        lines
+            .map(str::trim)
+            .map(predicates::str::contains)
+            .fold(self, assert_cmd::assert::Assert::stdout)
     }
 }
 
