@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
+pub mod config;
 pub mod junit_reader;
 mod read_target;
 mod testsuites;
@@ -15,20 +16,25 @@ use junit_reader::JunitReader;
 use read_target::ReadTarget;
 use testsuites::{Merge, Testsuites};
 
+use self::config::Config;
+
 #[derive(Debug)]
 pub struct JunitMerger<T: JunitReader> {
     readers: Vec<T>,
+    config: Config,
 }
 
 impl<T: JunitReader> JunitMerger<T> {
-    pub fn new(readers: Vec<T>) -> Self {
-        Self { readers }
+    pub fn new(readers: Vec<T>, config: Config) -> Self {
+        Self { readers, config }
     }
 
     pub fn merge_into(&mut self) -> Result<Vec<u8>> {
-        let mut xml_writer = Writer::new_with_indent(Vec::from(
-            b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".as_slice(),
-        ), ' '.try_into()?, 3);
+        let mut xml_writer = Writer::new_with_indent(
+            Vec::from(b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".as_slice()),
+            self.config.indent_char,
+            self.config.indent_size,
+        );
 
         let mut buf = Vec::new();
 
@@ -70,11 +76,14 @@ impl<T: JunitReader> JunitMerger<T> {
 }
 
 impl<'a, S: AsRef<str> + AsRef<Path> + 'a> JunitMerger<ReadTarget<'a, S, BufReader<File>>> {
-    pub fn from_paths(paths: impl IntoIterator<Item = &'a S>) -> Result<Self> {
+    pub fn from_paths_and_config(
+        paths: impl IntoIterator<Item = &'a S>,
+        config: Config,
+    ) -> Result<Self> {
         let readers: Result<Vec<_>> = paths
             .into_iter()
             .map(|path| ReadTarget::from_path(path))
             .collect();
-        readers.map(Self::new)
+        readers.map(|paths| Self::new(paths, config))
     }
 }

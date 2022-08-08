@@ -5,6 +5,7 @@ use clap::AppSettings;
 use clap::ArgAction;
 
 use crate::cli::application_request::ApplicationRequest;
+use crate::junit_merger::config::Config;
 use crate::junit_merger::JunitMerger;
 
 use super::output_writer::OutputWriter;
@@ -40,7 +41,7 @@ impl<'help> Application<'help> {
     }
 
     fn run_with_request(request: ApplicationRequest) -> Result<()> {
-        let mut merger = JunitMerger::from_paths(request.paths)?;
+        let mut merger = JunitMerger::from_paths_and_config(request.paths, Config::default())?;
         let result = merger.merge_into()?;
         OutputWriter::write(&result, request.output_path)
     }
