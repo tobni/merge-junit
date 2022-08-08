@@ -70,18 +70,18 @@ jobs:
     - name: Archive build
       shell: bash
       run: |
-        package=merge-junit-${{ needs.release.outputs.RELEASE_VERSION }}-${{ matrix.os }}
-        mkdir -p .target
+        package=merge-junit-${{ needs.release.outputs.RELEASE_VERSION }}-${{ matrix.target }}
+        mkdir -p $package
 
-        cp {README.md,LICENSE} ".target/"
+        cp {README.md,LICENSE} "$package/"
 
         if [ "${{ matrix.os }}" = "windows" ]; then
-          cp "target/${{ matrix.target }}/release/merge-junit.exe" ".target/"
-          7z a "$package.zip" ".target"
+          cp "target/${{ matrix.target }}/release/merge-junit.exe" "$package/"
+          7z a "$package.zip" "$package"
           echo "PACKAGE=$package.zip" >> $GITHUB_ENV
         else
-          cp "target/${{ matrix.target }}/release/merge-junit" ".target/"
-          tar czf "$package.tar.gz" ".target"
+          cp "target/${{ matrix.target }}/release/merge-junit" "$package/"
+          tar czf "$package.tar.gz" "$package"
           echo "PACKAGE=$package.tar.gz" >> $GITHUB_ENV
         fi
     
