@@ -77,7 +77,7 @@ fn does_not_overwrite_file_without_force_flag() -> Result<(), Box<dyn std::error
         .failure()
         .stdout(predicates::str::is_empty())
         .stderr(predicates::str::contains(
-            "/junit_2.xml' exists. Set '--force' flag to overwrite.",
+            "junit_2.xml' exists. Set '--force' flag to overwrite.",
         ));
 
     output_file.assert("");
