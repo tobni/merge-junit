@@ -1,10 +1,14 @@
 [package]
 name = "merge-junit"
 version = "0.1.0"
-description = "CLI utility to merge JUnit compliant XML documents into a single XML document."
-keywords = ["junit", "xml", "test", "report"]
-categories = ["command-line-utilities", "text-processing"]
+authors = ["tobias.jens.nilsson@gmail.com"]
 license = "Unlicense"
+description = "CLI utility to merge JUnit compliant XML documents into a single XML document."
+readme = "README.md"
+homepage = "https://github.com/tobni/merge-junit"
+repository = "https://github.com/you/grrs"
+keywords = ["cli", "junit", "xml", "report"]
+categories = ["command-line-utilities", "text-processing"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
