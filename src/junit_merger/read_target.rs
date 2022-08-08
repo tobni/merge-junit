@@ -17,7 +17,11 @@ pub struct ReadTarget<'a, S: AsRef<str>, R: BufRead> {
 }
 
 impl<'a, S: AsRef<str>, R: BufRead> ReadTarget<'a, S, R> {
-    fn read_event_from_reader<'b>(&mut self, buffer: &'b mut Vec<u8>, trim: bool) -> Result<Event<'b>> {
+    fn read_event_from_reader<'b>(
+        &mut self,
+        buffer: &'b mut Vec<u8>,
+        trim: bool,
+    ) -> Result<Event<'b>> {
         if let Some(event) = self.staged_events.pop_front() {
             Ok(event)
         } else {
@@ -59,7 +63,7 @@ impl<'a, P: AsRef<str>, R: BufRead> JunitReader for ReadTarget<'a, P, R> {
     }
 
     fn stage_event(&mut self, event: Event<'static>) {
-        self.staged_events.push_back(event)
+        self.staged_events.push_back(event);
     }
 
     fn read_event<'b>(&mut self, buffer: &'b mut Vec<u8>) -> Result<Event<'b>> {

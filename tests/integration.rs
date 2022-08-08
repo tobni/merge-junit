@@ -149,7 +149,10 @@ fn can_merge_single_testsuite_with_testsuites() -> Result<(), Box<dyn std::error
         .assert()
         .success();
 
-    for line in VALID_JUNIT_XML_SINGLE_TESTSUITE.lines().chain(VALID_JUNIT_XML.lines()) {
+    for line in VALID_JUNIT_XML_SINGLE_TESTSUITE
+        .lines()
+        .chain(VALID_JUNIT_XML.lines())
+    {
         assert = assert.stdout(predicates::str::contains(line.trim()));
     }
     Ok(())
