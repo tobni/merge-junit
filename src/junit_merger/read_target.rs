@@ -17,15 +17,19 @@ pub struct ReadTarget<'a, S: AsRef<str>, R: BufRead> {
 }
 
 impl<'a, S: AsRef<str>, R: BufRead> ReadTarget<'a, S, R> {
-    fn read_event_from_reader<'b>(
-        &mut self,
-        buffer: &'b mut Vec<u8>,
-        trim: bool,
-    ) -> Result<Event<'b>> {
+    fn read_event_from_reader<'b>(&mut self, buffer: &'b mut Vec<u8>) -> Result<Event<'b>> {
         if let Some(event) = self.staged_events.pop_front() {
             Ok(event)
         } else {
-            Ok(self.reader.trim_text(trim).read_event(buffer)?)
+            Ok(self.reader.read_event(buffer)?)
+        }
+    }
+    fn new(name: &'a S, mut reader: Reader<R>) -> Self {
+        reader.trim_text(true);
+        Self {
+            name,
+            reader,
+            staged_events: VecDeque::default(),
         }
     }
 }
@@ -35,25 +39,20 @@ where
     S: AsRef<str> + AsRef<Path>,
 {
     pub fn from_path(path: &'a S) -> Result<Self> {
-        Ok(Self {
-            name: path,
-            reader: Reader::from_file(path).context(format!(
+        Ok(Self::new(
+            path,
+            Reader::from_file(path).context(format!(
                 "Cannot read file '{}'.",
                 <S as AsRef<str>>::as_ref(path)
             ))?,
-            staged_events: VecDeque::default(),
-        })
+        ))
     }
 }
 
 #[cfg(test)]
 impl<'a, S: AsRef<str>> ReadTarget<'a, S, BufReader<&'a [u8]>> {
     pub fn from_buffer(name: &'a S, buffer: &'a [u8]) -> Self {
-        Self {
-            name,
-            reader: Reader::from_reader(BufReader::new(buffer)),
-            staged_events: VecDeque::default(),
-        }
+        Self::new(name, Reader::from_reader(BufReader::new(buffer)))
     }
 }
 
@@ -67,11 +66,7 @@ impl<'a, P: AsRef<str>, R: BufRead> JunitReader for ReadTarget<'a, P, R> {
     }
 
     fn read_event<'b>(&mut self, buffer: &'b mut Vec<u8>) -> Result<Event<'b>> {
-        self.read_event_from_reader(buffer, false)
-    }
-
-    fn read_trimmed_event<'b>(&mut self, buffer: &'b mut Vec<u8>) -> Result<Event<'b>> {
-        self.read_event_from_reader(buffer, true)
+        self.read_event_from_reader(buffer)
     }
 }
 

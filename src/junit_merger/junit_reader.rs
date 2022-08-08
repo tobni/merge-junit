@@ -11,12 +11,10 @@ pub trait JunitReader {
 
     fn read_event<'a>(&mut self, buffer: &'a mut Vec<u8>) -> Result<Event<'a>>;
 
-    fn read_trimmed_event<'a>(&mut self, buffer: &'a mut Vec<u8>) -> Result<Event<'a>>;
-
     fn stage_event(&mut self, event: Event<'static>);
 
     fn read_until_testsuites(&mut self, buffer: &'_ mut Vec<u8>) -> Result<Option<Testsuites>> {
-        if let Event::Decl(_) = self.read_trimmed_event(buffer)? {
+        if let Event::Decl(_) = self.read_event(buffer)? {
             self.read_testsuites(buffer)
         } else {
             bail!("Required declaration <?xml version=\"1.0\" encoding=\"UTF-8\"?> was not at the top of xml content.")
@@ -24,7 +22,7 @@ pub trait JunitReader {
     }
 
     fn read_testsuites(&mut self, buffer: &'_ mut Vec<u8>) -> Result<Option<Testsuites>> {
-        let result = match self.read_trimmed_event(buffer)? {
+        let result = match self.read_event(buffer)? {
             Event::Start(tag) if tag.name() == b"testsuites" => {
                 Some(Testsuites::from_attributes(tag.attributes()).context("Parsing attributes.")?)
             }

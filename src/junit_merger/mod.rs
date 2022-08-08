@@ -41,7 +41,7 @@ impl<T: JunitReader> JunitMerger<T> {
         xml_writer.write_event(self.create_start_event(&mut buf)?)?;
         for xml_reader in &mut self.readers {
             'read: loop {
-                match xml_reader.read_trimmed_event(&mut buf)? {
+                match xml_reader.read_event(&mut buf)? {
                     Event::End(tag) if tag.name() == b"testsuites" => break 'read,
                     Event::Eof => break 'read,
                     event => xml_writer.write_event(event)?,
