@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       upload_url: ${{ steps.release.outputs.upload_url }}
+      release_version: ${{ env.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -69,7 +70,7 @@ jobs:
     - name: Archive build
       shell: bash
       run: |
-        package=merge-junit-${{ env.RELEASE_VERSION }}-${{ matrix.os }}
+        package=merge-junit-${{ needs.release.outputs.RELEASE_VERSION }}-${{ matrix.os }}
         mkdir -p .target
 
         cp {README.md,LICENSE} ".target/"
