@@ -1,4 +1,3 @@
-use assert_cmd::Command;
 use assert_fs::prelude::*;
 use predicates::prelude::*;
 
@@ -14,12 +13,12 @@ fn prints_to_stdout_with_no_output_target() -> Result<(), Box<dyn std::error::Er
     let file = assert_fs::NamedTempFile::new("junit.xml")?;
     file.write_str(VALID_JUNIT_XML)?;
 
-    Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .args([file.path()])
         .assert()
         .success()
-        .stdout(predicates::str::contains(VALID_JUNIT_XML));
+        .stdout_contains_lines_trimmed(VALID_JUNIT_XML.lines());
     Ok(())
 }
 
@@ -33,16 +32,14 @@ fn merges_testsuites() -> Result<(), Box<dyn std::error::Error>> {
     let expected_content_1 = VALID_JUNIT_XML.strip_prefix("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.03\">").unwrap().strip_suffix("</testsuites>").unwrap();
     let expected_content_2: &str = VALID_JUNIT_XML_WITH_DIFFERENT_TIME.strip_prefix("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.6\">").unwrap();
 
-    Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .args([file_1.path(), file_2.path()])
         .assert()
         .success()
         .stdout(
-            predicates::str::starts_with("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.63\">").and(
-            predicates::str::contains(expected_content_1))
-                .and(predicates::str::contains(expected_content_2)),
-        );
+            predicates::str::starts_with("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.63\">")
+        ).stdout_contains_lines_trimmed(expected_content_1.lines().chain(expected_content_2.lines()));
     Ok(())
 }
 
@@ -52,7 +49,7 @@ fn writes_to_output_file() -> Result<(), Box<dyn std::error::Error>> {
     file_1.write_str(VALID_JUNIT_XML)?;
     let output_file = assert_fs::NamedTempFile::new("junit_2.xml")?;
 
-    Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .arg(file_1.path())
         .arg("-o")
@@ -60,7 +57,7 @@ fn writes_to_output_file() -> Result<(), Box<dyn std::error::Error>> {
         .assert()
         .success();
 
-    output_file.assert(VALID_JUNIT_XML);
+    output_file.contains_lines_trimmed(VALID_JUNIT_XML.lines());
     Ok(())
 }
 
@@ -71,7 +68,7 @@ fn does_not_overwrite_file_without_force_flag() -> Result<(), Box<dyn std::error
     let output_file = assert_fs::NamedTempFile::new("junit_2.xml")?;
     output_file.touch()?;
 
-    Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .arg(file_1.path())
         .arg("-o")
@@ -91,7 +88,7 @@ fn does_not_overwrite_file_without_force_flag() -> Result<(), Box<dyn std::error
 fn no_input_files_fail() -> Result<(), Box<dyn std::error::Error>> {
     let output_file = assert_fs::NamedTempFile::new("junit_1.xml")?;
 
-    Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .arg("-o")
         .arg(output_file.path())
@@ -108,7 +105,7 @@ fn input_file_without_testsuites_tag_fail() -> Result<(), Box<dyn std::error::Er
 
     input.write_str(INVALID_JUNIT_XML)?;
 
-    Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .arg(input.path())
         .assert()
@@ -125,14 +122,12 @@ fn accepts_single_testsuite() -> Result<(), Box<dyn std::error::Error>> {
     let input = assert_fs::NamedTempFile::new("junit_1.xml")?;
     input.write_str(VALID_JUNIT_XML_SINGLE_TESTSUITE)?;
     let lines = VALID_JUNIT_XML_SINGLE_TESTSUITE.lines();
-    let mut assert = Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .arg(input.path())
         .assert()
-        .success();
-    for line in lines {
-        assert = assert.stdout(predicates::str::contains(line.trim()));
-    }
+        .success()
+        .stdout_contains_lines_trimmed(lines);
     Ok(())
 }
 
@@ -143,17 +138,47 @@ fn can_merge_single_testsuite_with_testsuites() -> Result<(), Box<dyn std::error
     let input_2 = assert_fs::NamedTempFile::new("junit_2.xml")?;
     input_2.write_str(VALID_JUNIT_XML)?;
 
-    let mut assert = Command::cargo_bin("merge-junit")
+    assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .args([input_1.path(), input_2.path()])
         .assert()
-        .success();
+        .success()
+        .stdout_contains_lines_trimmed(
+            VALID_JUNIT_XML_SINGLE_TESTSUITE
+                .lines()
+                .chain(VALID_JUNIT_XML.lines()),
+        );
 
-    for line in VALID_JUNIT_XML_SINGLE_TESTSUITE
-        .lines()
-        .chain(VALID_JUNIT_XML.lines())
-    {
-        assert = assert.stdout(predicates::str::contains(line.trim()));
-    }
     Ok(())
+}
+
+trait ContainsLinesTrimmedStdout {
+    fn stdout_contains_lines_trimmed<'a>(self, lines: impl Iterator<Item = &'a str>) -> Self;
+}
+
+impl ContainsLinesTrimmedStdout for assert_cmd::assert::Assert {
+    fn stdout_contains_lines_trimmed<'a>(self, lines: impl Iterator<Item = &'a str>) -> Self {
+        fn contains_trimmed_line(
+            assert: assert_cmd::assert::Assert,
+            line: &str,
+        ) -> assert_cmd::assert::Assert {
+            assert.stdout(predicates::str::contains(line.trim()))
+        }
+        lines.fold(self, contains_trimmed_line)
+    }
+}
+
+trait ContainsLinesTrimmedFile {
+    fn contains_lines_trimmed<'a>(self, lines: impl Iterator<Item = &'a str>) -> Self;
+}
+
+impl ContainsLinesTrimmedFile for &assert_fs::NamedTempFile {
+    fn contains_lines_trimmed<'a>(self, lines: impl Iterator<Item = &'a str>) -> Self {
+        let content = std::fs::read(self).unwrap();
+        let string = String::from_utf8(content).unwrap();
+        for line in lines {
+            assert!(string.contains(line.trim()))
+        }
+        self
+    }
 }
