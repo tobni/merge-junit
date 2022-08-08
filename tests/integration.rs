@@ -29,17 +29,21 @@ fn merges_testsuites() -> Result<(), Box<dyn std::error::Error>> {
     let file_2 = assert_fs::NamedTempFile::new("junit_2.xml")?;
     file_2.write_str(VALID_JUNIT_XML_WITH_DIFFERENT_TIME)?;
 
-    let expected_content_1 = VALID_JUNIT_XML.strip_prefix("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.03\">").unwrap().strip_suffix("</testsuites>").unwrap();
-    let expected_content_2: &str = VALID_JUNIT_XML_WITH_DIFFERENT_TIME.strip_prefix("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.6\">").unwrap();
+    let expected_content_1 = VALID_JUNIT_XML.lines().skip(2);
+    let expected_content_2 = VALID_JUNIT_XML_WITH_DIFFERENT_TIME.lines().skip(2);
 
     assert_cmd::Command::cargo_bin("merge-junit")
         .unwrap()
         .args([file_1.path(), file_2.path()])
         .assert()
         .success()
-        .stdout(
-            predicates::str::starts_with("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<testsuites name=\"my tests\" time=\"0.63\">")
-        ).stdout_contains_lines_trimmed(expected_content_1.lines().chain(expected_content_2.lines()));
+        .stdout(predicates::str::starts_with(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+        ))
+        .stdout(predicates::str::contains(
+            "<testsuites name=\"my tests\" time=\"0.63\">",
+        ))
+        .stdout_contains_lines_trimmed(expected_content_1.chain(expected_content_2));
     Ok(())
 }
 
