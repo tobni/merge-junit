@@ -1,4 +1,3 @@
-use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
 use quick_xml::events::BytesEnd;
@@ -27,18 +26,18 @@ impl<T: JunitReader> JunitMerger<T> {
     }
 
     pub fn merge_into(&mut self) -> Result<Vec<u8>> {
-        let mut xml_writer = Writer::new(Vec::from(
+        let mut xml_writer = Writer::new_with_indent(Vec::from(
             b"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n".as_slice(),
-        ));
+        ), ' '.try_into()?, 3);
 
         let mut buf = Vec::new();
 
         xml_writer.write_event(self.create_start_event(&mut buf)?)?;
         for xml_reader in &mut self.readers {
             'read: loop {
-                match xml_reader.read_event(&mut buf)? {
+                match xml_reader.read_trimmed_event(&mut buf)? {
                     Event::End(tag) if tag.name() == b"testsuites" => break 'read,
-                    Event::Eof => bail!("Could not locate </testsuites> end tag within '{}'. Is it valid JUnit XML?", xml_reader.name()),
+                    Event::Eof => break 'read,
                     event => xml_writer.write_event(event)?,
                 }
                 buf.clear();
@@ -50,11 +49,15 @@ impl<T: JunitReader> JunitMerger<T> {
     }
 
     fn create_start_event(&mut self, buffer: &mut Vec<u8>) -> Result<Event<'static>> {
-        let mut testsuites_headers = self.readers.iter_mut().map(|reader| {
-            reader
-                .read_until_testsuites(buffer)
-                .context("Deserializing header tags.")
-        });
+        let mut testsuites_headers = self
+            .readers
+            .iter_mut()
+            .map(|reader| {
+                reader
+                    .read_until_testsuites(buffer)
+                    .context("Deserializing header tags.")
+            })
+            .filter_map(Result::transpose);
         let header = {
             if let Some(init) = testsuites_headers.next() {
                 testsuites_headers.fold(init, Result::<Testsuites>::merge)

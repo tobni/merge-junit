@@ -9,7 +9,7 @@ fn can_read_testsuites_start_tag() -> Result<()> {
 
     let testsuites = read_target.read_until_testsuites(&mut vec![])?;
 
-    assert_eq!(testsuites, Testsuites::default());
+    assert_eq!(testsuites, Some(Testsuites::default()));
     Ok(())
 }
 
@@ -26,6 +26,19 @@ fn can_read_testsuites_start_tag_with_attributes() -> Result<()> {
         ..Default::default()
     };
 
+    assert_eq!(testsuites, Some(expected));
+    Ok(())
+}
+
+#[test]
+fn accepts_missing_testsuites_tag_when_tag_is_testsuite() -> Result<()> {
+    let mut read_target = given_read_target(
+        b"<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuite name=\"My Module\">",
+    );
+
+    let testsuites = read_target.read_until_testsuites(&mut vec![])?;
+
+    let expected = None;
     assert_eq!(testsuites, expected);
     Ok(())
 }

@@ -6,6 +6,8 @@ static VALID_JUNIT_XML: &str = include_str!("./resources/valid_junit.xml");
 static VALID_JUNIT_XML_WITH_DIFFERENT_TIME: &str =
     include_str!("./resources/valid_junit_with_different_time.xml");
 static INVALID_JUNIT_XML: &str = include_str!("./resources/invalid_junit.xml");
+static VALID_JUNIT_XML_SINGLE_TESTSUITE: &str =
+    include_str!("./resources/valid_junit_single_testsuite.xml");
 
 #[test]
 fn prints_to_stdout_with_no_output_target() -> Result<(), Box<dyn std::error::Error>> {
@@ -119,18 +121,36 @@ fn input_file_without_testsuites_tag_fail() -> Result<(), Box<dyn std::error::Er
 }
 
 #[test]
-fn empty_input_file_fail() -> Result<(), Box<dyn std::error::Error>> {
+fn accepts_single_testsuite() -> Result<(), Box<dyn std::error::Error>> {
     let input = assert_fs::NamedTempFile::new("junit_1.xml")?;
-    input.touch()?;
-
-    Command::cargo_bin("merge-junit")
+    input.write_str(VALID_JUNIT_XML_SINGLE_TESTSUITE)?;
+    let lines = VALID_JUNIT_XML_SINGLE_TESTSUITE.lines();
+    let mut assert = Command::cargo_bin("merge-junit")
         .unwrap()
         .arg(input.path())
         .assert()
-        .failure()
-        .stderr(predicates::str::contains(
-            "Required declaration",
-        ))
-        .stdout(predicates::str::is_empty());
+        .success();
+    for line in lines {
+        assert = assert.stdout(predicates::str::contains(line.trim()));
+    }
+    Ok(())
+}
+
+#[test]
+fn can_merge_single_testsuite_with_testsuites() -> Result<(), Box<dyn std::error::Error>> {
+    let input_1 = assert_fs::NamedTempFile::new("junit_1.xml")?;
+    input_1.write_str(VALID_JUNIT_XML_SINGLE_TESTSUITE)?;
+    let input_2 = assert_fs::NamedTempFile::new("junit_2.xml")?;
+    input_2.write_str(VALID_JUNIT_XML)?;
+
+    let mut assert = Command::cargo_bin("merge-junit")
+        .unwrap()
+        .args([input_1.path(), input_2.path()])
+        .assert()
+        .success();
+
+    for line in VALID_JUNIT_XML_SINGLE_TESTSUITE.lines().chain(VALID_JUNIT_XML.lines()) {
+        assert = assert.stdout(predicates::str::contains(line.trim()));
+    }
     Ok(())
 }
