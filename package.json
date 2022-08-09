@@ -6,6 +6,9 @@
   "scripts": {
     "postinstall": "node npm_package/install.js"
   },
+  "bin": {
+    "merge-junit": "npm_package/run.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tobni/merge-junit.git"
