@@ -64,14 +64,14 @@ impl<T: JunitReader> JunitMerger<T> {
                     .context("Deserializing header tags.")
             })
             .filter_map(Result::transpose);
-        let header = {
-            if let Some(init) = testsuites_headers.next() {
-                testsuites_headers.fold(init, Result::<Testsuites>::merge)
-            } else {
-                Ok(Testsuites::default())
-            }
-        };
-        header.map(Testsuites::into_start_event)
+
+        testsuites_headers
+            .next()
+            .map_or_else(
+                || Ok(Testsuites::default()),
+                |init| testsuites_headers.fold(init, Result::<Testsuites>::merge),
+            )
+            .map(Testsuites::into_start_event)
     }
 }
 
