@@ -1,0 +1,28 @@
+{
+  "name": "merge-junit",
+  "version": "0.1.2",
+  "description": "CLI utility to merge JUnit compliant XML documents into a single XML document.",
+  "main": "npm_package/binary.js",
+  "scripts": {
+    "postinstall": "node npm_package/install.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tobni/merge-junit.git"
+  },
+  "keywords": [
+    "cli",
+    "junit",
+    "xml",
+    "report"
+  ],
+  "author": "Tobias Nilsson <tobias.jens.nilsson@gmail.com>",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/tobni/merge-junit/issues"
+  },
+  "homepage": "https://github.com/tobni/merge-junit#readme",
+  "devDependencies": {
+    "binary-install": "^1.0.6"
+  }
+}
