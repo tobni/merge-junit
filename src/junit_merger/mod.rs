@@ -70,8 +70,8 @@ impl<T: JunitReader> JunitMerger<T> {
             } else {
                 Ok(Testsuites::default())
             }
-        }?;
-        Ok(header.into_start_event())
+        };
+        header.map(Testsuites::into_start_event)
     }
 }
 
