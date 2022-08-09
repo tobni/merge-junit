@@ -13,7 +13,7 @@ merge-junit 0.1.3
 Downloading binaries (e.g Linux):
 ```sh
 $ curl -L https://github.com/tobni/merge-junit/releases/download/v0.1.3/merge-junit-v0.1.3-x86_64-unknown-linux-musl.tar.gz | tar -xz
-./merge-junit-v0.1.3-x86_64-unknown-linux-musl/merge-junit --version
+$ ./merge-junit-v0.1.3-x86_64-unknown-linux-musl/merge-junit --version
 merge-junit 0.1.3
 ```
 
