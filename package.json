@@ -22,7 +22,7 @@
     "url": "https://github.com/tobni/merge-junit/issues"
   },
   "homepage": "https://github.com/tobni/merge-junit#readme",
-  "devDependencies": {
+  "dependencies": {
     "binary-install": "^1.0.6"
   }
 }
