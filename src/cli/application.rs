@@ -1,7 +1,5 @@
 use anyhow::Result;
-use clap::arg;
 use clap::command;
-use clap::AppSettings;
 use clap::ArgAction;
 
 use crate::cli::application_request::ApplicationRequest;
@@ -10,21 +8,31 @@ use crate::junit_merger::JunitMerger;
 use super::output_writer::OutputWriter;
 
 #[derive(Debug)]
-pub struct Application<'help> {
-    clap: clap::App<'help>,
+pub struct Application {
+    clap: clap::Command,
 }
 
-impl<'help> Application<'help> {
+impl Application {
     pub fn new() -> Self {
         let clap = command!()
-            .arg(arg!(<FILE>... "Input file(s), should be valid JUnit XML format"))
             .arg(
-                arg!(-o --output "Output file path, omit for STDOUT")
-                    .takes_value(true)
+                clap::Arg::new("FILE")
+                    .help("Input file(s), should be valid JUnit XML format")
+                    .num_args(1..)
+                    .required(true),
+            )
+            .arg(
+                clap::Arg::new("output")
+                    .long("output")
+                    .short('o')
+                    .help("Output file path, omit for STDOUT")
                     .value_name("FILE"),
             )
             .arg(
-                arg!(-f --force "No error if output file exists, overwrites content")
+                clap::Arg::new("force")
+                    .short('f')
+                    .long("force")
+                    .help("No error if output file exists, overwrites content")
                     .action(ArgAction::SetTrue),
             )
             .arg(
@@ -32,7 +40,6 @@ impl<'help> Application<'help> {
                     .long("indent-size")
                     .short('s')
                     .help("Number of indentation characters")
-                    .takes_value(true)
                     .value_name("INT")
                     .value_parser(clap::value_parser!(usize))
                     .default_value("3"),
@@ -42,13 +49,10 @@ impl<'help> Application<'help> {
                     .long("indent-character")
                     .short('c')
                     .help("Whitespace character to use for indentation")
-                    .takes_value(true)
-                    .value_name("CHAR")
                     .value_parser(clap::value_parser!(char))
                     .default_value(" "),
             )
-            .setting(AppSettings::ArgRequiredElseHelp)
-            .disable_colored_help(true);
+            .arg_required_else_help(true);
         Self { clap }
     }
 
