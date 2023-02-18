@@ -23,12 +23,12 @@ pub trait JunitReader {
 
     fn read_testsuites(&mut self, buffer: &'_ mut Vec<u8>) -> Result<Option<Testsuites>> {
         let result = match self.read_event(buffer)? {
-            Event::Start(tag) if tag.name() == b"testsuites" => {
+            Event::Start(tag) if tag.name().into_inner() == b"testsuites" => {
                 Some(Testsuites::from_attributes(tag.attributes()).context("Parsing attributes.")?)
             }
-            Event::Start(tag) if tag.name() == b"testsuite" => {
+            Event::Start(tag) if tag.name().into_inner() == b"testsuite" => {
                 self.stage_event(Event::Start(
-                    BytesStart::borrowed_name(b"testsuite")
+                    BytesStart::new("testsuite")
                         .with_attributes(tag.attributes().filter_map(Result::ok)),
                 ));
                 None

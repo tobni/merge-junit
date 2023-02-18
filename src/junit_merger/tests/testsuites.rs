@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn test_can_parse_from_attributes() -> Result<()> {
-    let attributes = Attributes::new(b"testsuites name=\"blark\" tests=\"2\"", 11);
+    let attributes = Attributes::new("testsuites name=\"blark\" tests=\"2\"", 11);
     let testsuites = Testsuites::from_attributes(attributes)?;
 
     let expected = Testsuites {

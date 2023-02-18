@@ -64,7 +64,7 @@ impl Testsuites {
         }
 
         Event::Start(
-            BytesStart::borrowed_name(b"testsuites")
+            BytesStart::new("testsuites")
                 .with_attributes(chain_with!(disabled, errors, failures, name, tests, time)),
         )
     }
@@ -85,7 +85,7 @@ impl Testsuites {
 
                     for attribute in attributes {
                         let attribute = attribute?;
-                        $(if stringify!($key).as_bytes() == attribute.key {
+                        $(if stringify!($key).as_bytes() == attribute.key.into_inner() {
                                 header = Testsuites { $key: Some(Testsuites::parse_attribute(&attribute.value)?), ..header };
                                 continue
                         })+

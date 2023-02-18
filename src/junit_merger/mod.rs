@@ -1,22 +1,23 @@
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+
 use anyhow::Context;
 use anyhow::Result;
 use quick_xml::events::BytesEnd;
 use quick_xml::events::Event;
 use quick_xml::Writer;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
-
-pub mod config;
-pub mod junit_reader;
-mod read_target;
-mod testsuites;
 
 use junit_reader::JunitReader;
 use read_target::ReadTarget;
 use testsuites::{Merge, Testsuites};
 
 use self::config::Config;
+
+pub mod config;
+pub mod junit_reader;
+mod read_target;
+mod testsuites;
 
 #[derive(Debug)]
 pub struct JunitMerger<T: JunitReader> {
@@ -42,14 +43,14 @@ impl<T: JunitReader> JunitMerger<T> {
         for xml_reader in &mut self.readers {
             'read: loop {
                 match xml_reader.read_event(&mut buf)? {
-                    Event::End(tag) if tag.name() == b"testsuites" => break 'read,
+                    Event::End(tag) if tag.name().into_inner() == b"testsuites" => break 'read,
                     Event::Eof => break 'read,
                     event => xml_writer.write_event(event)?,
                 }
                 buf.clear();
             }
         }
-        xml_writer.write_event(Event::End(BytesEnd::borrowed(b"testsuites")))?;
+        xml_writer.write_event(Event::End(BytesEnd::new("testsuites")))?;
         xml_writer.write_event(Event::Eof)?;
         Ok(xml_writer.into_inner())
     }

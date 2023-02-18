@@ -20,7 +20,7 @@ impl<'a, S: AsRef<str>, R: BufRead> ReadTarget<'a, S, R> {
     fn read_event_from_reader<'b>(&mut self, buffer: &'b mut Vec<u8>) -> Result<Event<'b>> {
         self.staged_events
             .pop_front()
-            .map_or_else(|| Ok(self.reader.read_event(buffer)?), Ok)
+            .map_or_else(|| Ok(self.reader.read_event_into(buffer)?), Ok)
     }
     fn new(name: &'a S, mut reader: Reader<R>) -> Self {
         reader.trim_text(true);
