@@ -52,6 +52,12 @@ impl Application {
                     .value_parser(clap::value_parser!(char))
                     .default_value(" "),
             )
+            .arg(
+                clap::Arg::new("name")
+                    .long("name")
+                    .short('n')
+                    .help("Name for the top-level testsuites tag attribute."),
+            )
             .arg_required_else_help(true);
         Self { clap }
     }

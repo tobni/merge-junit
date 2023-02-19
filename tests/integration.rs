@@ -156,6 +156,21 @@ fn can_merge_single_testsuite_with_testsuites() -> Result<(), Box<dyn std::error
     Ok(())
 }
 
+#[test]
+fn can_override_testsuites_name() -> Result<(), Box<dyn std::error::Error>> {
+    let input_1 = assert_fs::NamedTempFile::new("junit_1.xml")?;
+    input_1.write_str(VALID_JUNIT_XML_SINGLE_TESTSUITE)?;
+
+    assert_cmd::Command::cargo_bin("merge-junit")
+        .unwrap()
+        .args(["--name", "new-name", &input_1.path().display().to_string()])
+        .assert()
+        .success()
+        .stdout_contains_lines_trimmed(["name=\"new-name\""].into_iter());
+
+    Ok(())
+}
+
 trait ContainsLinesTrimmedStdout {
     fn stdout_contains_lines_trimmed<'a>(self, lines: impl Iterator<Item = &'a str>) -> Self;
 }

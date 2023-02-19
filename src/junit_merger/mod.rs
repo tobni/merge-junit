@@ -72,6 +72,10 @@ impl<T: JunitReader> JunitMerger<T> {
                 || Ok(Testsuites::default()),
                 |init| testsuites_headers.fold(init, Result::<Testsuites>::merge),
             )
+            .map(|suites| Testsuites {
+                name: self.config.name_override.clone().or(suites.name),
+                ..suites
+            })
             .map(Testsuites::into_start_event)
     }
 }

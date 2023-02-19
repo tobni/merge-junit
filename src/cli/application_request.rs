@@ -12,6 +12,7 @@ pub struct ApplicationRequest<'a> {
     pub output_path: Option<&'a Path>,
     pub indent_size: usize,
     pub indent_character: u8,
+    pub name_override: Option<&'a String>,
 }
 
 impl<'a> ApplicationRequest<'a> {
@@ -25,11 +26,13 @@ impl<'a> ApplicationRequest<'a> {
                 .get_one::<char>("indent-character")
                 .expect("--indent-character has a default value.");
             let indent_character = indent_character.try_into()?;
+            let name_override = matches.get_one("name");
             Some(ApplicationRequest {
                 paths,
                 output_path,
                 indent_size,
                 indent_character,
+                name_override,
             })
         } else {
             None
@@ -40,6 +43,7 @@ impl<'a> ApplicationRequest<'a> {
         Config {
             indent_char: self.indent_character,
             indent_size: self.indent_size,
+            name_override: self.name_override.cloned(),
         }
     }
 }
