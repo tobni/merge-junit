@@ -1,6 +1,6 @@
 [package]
 name = "merge-junit"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Tobias Nilsson <tobias.jens.nilsson@gmail.com>"]
 license = "Unlicense"
 description = "CLI utility to merge JUnit compliant XML documents into a single XML document."

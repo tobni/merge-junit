@@ -1,6 +1,6 @@
 {
   "name": "merge-junit",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "CLI utility to merge JUnit compliant XML documents into a single XML document.",
   "main": "npm_package/binary.js",
   "scripts": {
