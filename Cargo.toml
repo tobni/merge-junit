@@ -21,4 +21,4 @@ clap = { version = "^4.1", features = ["cargo"] }
 [dev-dependencies]
 assert_cmd = "^2.0"
 assert_fs = "^1.0"
-predicates = "^2.1"
+predicates = "^3.0"
