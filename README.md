@@ -7,14 +7,14 @@ Via npm:
 ```sh
 $ npm i merge-junit
 $ npx merge-junit --version
-merge-junit 0.2.0
+merge-junit 0.2.1
 ```
 
 Downloading binaries (e.g Linux):
 ```sh
-$ curl -L https://github.com/tobni/merge-junit/releases/download/v0.2.0/merge-junit-v0.2.0-x86_64-unknown-linux-musl.tar.gz | tar -xz
-$ ./merge-junit-v0.2.0-x86_64-unknown-linux-musl/merge-junit --version
-merge-junit 0.2.0
+$ curl -L https://github.com/tobni/merge-junit/releases/download/v0.2.1/merge-junit-v0.2.1-x86_64-unknown-linux-musl.tar.gz | tar -xz
+$ ./merge-junit-v0.2.1-x86_64-unknown-linux-musl/merge-junit --version
+merge-junit 0.2.1
 ```
 
 From source:
@@ -23,7 +23,7 @@ $ git clone https://github.com/tobni/merge-junit
 $ cd merge-junit
 $ cargo build --release
 $ ./target/release/merge-junit --version
-merge-junit 0.2.0
+merge-junit 0.2.1
 ```
 
 ## Usage example
