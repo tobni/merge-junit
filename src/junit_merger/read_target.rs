@@ -23,7 +23,7 @@ impl<'a, S: AsRef<str>, R: BufRead> ReadTarget<'a, S, R> {
             .map_or_else(|| Ok(self.reader.read_event_into(buffer)?), Ok)
     }
     fn new(name: &'a S, mut reader: Reader<R>) -> Self {
-        reader.trim_text(true);
+        reader.config_mut().trim_text(true);
         Self {
             name,
             reader,
