@@ -2,4 +2,4 @@
 
 const { getBinary } = require('./binary.js')
 
-getBinary().install()
+getBinary().install({})

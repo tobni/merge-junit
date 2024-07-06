@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/tobni/merge-junit#readme",
   "dependencies": {
-    "binary-install": "^1.0.6"
+    "binary-install": "^1.1.0"
   }
 }
