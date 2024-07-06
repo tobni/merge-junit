@@ -13,10 +13,10 @@ jobs:
       upload_url: ${{ steps.release.outputs.upload_url }}
       release_version: ${{ env.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Get changelog
         run: |
           echo '# Changes' > changelog.md
@@ -37,7 +37,7 @@ jobs:
           body_path: changelog.md
           draft: false
           prerelease: false
-  
+
   build:
     name: Build
     needs: release
@@ -56,13 +56,9 @@ jobs:
             target: x86_64-pc-windows-gnu
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        target: ${{ matrix.target }}
-        override: true
+      uses: dtolnay/rust-toolchain@stable
 
     - name: Build binary
       run: cargo build --verbose --release --target ${{ matrix.target }}
@@ -84,7 +80,7 @@ jobs:
           tar czf "$package.tar.gz" "$package"
           echo "PACKAGE=$package.tar.gz" >> $GITHUB_ENV
         fi
-    
+
     - name: Upload release archive
       uses: actions/upload-release-asset@v1.0.1
       env:
